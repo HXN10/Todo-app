@@ -1,0 +1,22 @@
+{
+  "todos": [
+    {
+      "text": "cur hair",
+      "category": "personal",
+      "time": "17:00",
+      "completed": true
+    },
+    {
+      "text": "quiz on mon",
+      "category": "study",
+      "time": "13:00",
+      "completed": true
+    },
+    {
+      "text": "chest on mon",
+      "category": "workout",
+      "time": "12:00",
+      "completed": true
+    }
+  ]
+}
