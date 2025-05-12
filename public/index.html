@@ -979,7 +979,10 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ todos })
+                    body: JSON.stringify({ 
+                        todos,
+                        userId: currentUser.username  // Add user ID to request
+                    })
                 });
 
                 if (!response.ok) {
@@ -993,7 +996,7 @@
         // Function to load todos from server
         async function loadTodos() {
             try {
-                const response = await fetch('/api/todos');
+                const response = await fetch(`/api/todos?userId=${currentUser.username}`);  // Add user ID to request
                 const data = await response.json();
                 
                 // Clear existing todos

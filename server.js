@@ -14,13 +14,18 @@ async function readData(filePath) {
         const data = await fsPromises.readFile(filePath, 'utf8');
         return JSON.parse(data);
     } catch (error) {
-        return { todos: [] };
+        return { todos: {} };  // Changed to object to store todos per user
     }
 }
 
 // Write data to JSON file
 async function writeData(filePath, data) {
-    await fsPromises.writeFile(filePath, JSON.stringify(data, null, 2));
+    try {
+        await fsPromises.writeFile(filePath, JSON.stringify(data, null, 2));
+    } catch (error) {
+        console.error('Error writing to file:', error);
+        throw error;
+    }
 }
 
 // Serve the main HTML file
@@ -31,8 +36,14 @@ app.get('/', (req, res) => {
 // Get todos
 app.get('/api/todos', async (req, res) => {
     try {
+        const userId = req.query.userId;  // Get userId from query parameter
+        if (!userId) {
+            return res.status(400).json({ error: 'User ID is required' });
+        }
+
         const data = await readData(path.join(__dirname, 'data', 'todos.json'));
-        res.json(data);
+        const userTodos = data.todos[userId] || [];
+        res.json({ todos: userTodos });
     } catch (error) {
         res.status(500).json({ error: 'Failed to read todos' });
     }
@@ -41,8 +52,14 @@ app.get('/api/todos', async (req, res) => {
 // Save todos
 app.post('/api/todos', async (req, res) => {
     try {
-        const { todos } = req.body;
-        await writeData(path.join(__dirname, 'data', 'todos.json'), { todos });
+        const { todos, userId } = req.body;  // Get userId from request body
+        if (!userId) {
+            return res.status(400).json({ error: 'User ID is required' });
+        }
+
+        const data = await readData(path.join(__dirname, 'data', 'todos.json'));
+        data.todos[userId] = todos;  // Store todos under user's ID
+        await writeData(path.join(__dirname, 'data', 'todos.json'), data);
         res.json({ success: true });
     } catch (error) {
         res.status(500).json({ error: 'Failed to save todos' });
