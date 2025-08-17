@@ -2,6 +2,7 @@ const express = require('express');
 const fs = require('fs');
 const fsPromises = require('fs').promises;
 const path = require('path');
+const bcrypt = require('bcrypt');
 const app = express();
 
 // Middleware
@@ -14,7 +15,7 @@ async function readData(filePath) {
         const data = await fsPromises.readFile(filePath, 'utf8');
         return JSON.parse(data);
     } catch (error) {
-        return { todos: {} };  // Changed to object to store todos per user
+        return { todos: {} };  // make objects so the todos get saved to a specific user
     }
 }
 
@@ -87,11 +88,19 @@ app.post('/api/register', async (req, res) => {
             return res.status(400).json({ success: false, message: 'User already exists' });
         }
 
-        // Add new user
-        users.push({ email, username, password });
+        // Hash the password
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+        // Adding new user 
+        users.push({ 
+            email, 
+            username, 
+            password: hashedPassword 
+        });
         await writeData(path.join(__dirname, 'data', 'users.json'), users);
 
-        res.json({ success: true });
+        res.status(201).json({ success: true });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Registration failed' });
     }
@@ -103,20 +112,29 @@ app.post('/api/login', async (req, res) => {
         const { identifier, password } = req.body;
         const users = await readData(path.join(__dirname, 'data', 'users.json'));
 
-        // Find user by email or username
+        // Finding user 
         const user = users.find(u => 
-            (u.email === identifier || u.username === identifier) && 
-            u.password === password
+            u.email === identifier || u.username === identifier
         );
 
         if (user) {
-            res.json({ 
-                success: true, 
-                user: { 
-                    email: user.email, 
-                    username: user.username 
-                } 
-            });
+            // Compare the passwords
+            const passwordMatch = await bcrypt.compare(password, user.password);
+            
+            if (passwordMatch) {
+                res.json({ 
+                    success: true, 
+                    user: { 
+                        email: user.email, 
+                        username: user.username 
+                    } 
+                });
+            } else {
+                res.status(401).json({ 
+                    success: false, 
+                    message: 'Invalid email/username or password' 
+                });
+            }
         } else {
             res.status(401).json({ 
                 success: false, 
@@ -130,19 +148,14 @@ app.post('/api/login', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log('=================================');
+ 
     console.log(`Server running on port ${PORT}`);
-    console.log(`Visit http://localhost:${PORT}`);
-    console.log('=================================');
     
-    // Verify important files exist
+    // checking if important files exist
     const publicPath = path.join(__dirname, 'public');
     const dataPath = path.join(__dirname, 'data');
     const indexPath = path.join(publicPath, 'index.html');
     
-    console.log('Checking required files:');
-    console.log(`Public directory exists: ${fs.existsSync(publicPath)}`);
-    console.log(`Data directory exists: ${fs.existsSync(dataPath)}`);
-    console.log(`index.html exists: ${fs.existsSync(indexPath)}`);
-    console.log('=================================');
+    
+   
 }); 

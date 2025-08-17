@@ -2,6 +2,9 @@
 
 A modern, responsive Todo application with user authentication and theme switching capabilities.
 
+by Hasan wehba, Yacine mostafa, Mohammed dableh
+
+
 ## Features
 
 - User Authentication (Sign Up/Login)
@@ -19,8 +22,7 @@ A modern, responsive Todo application with user authentication and theme switchi
 - Express.js
 - HTML5
 - CSS3
-- JavaScript (ES6+)
-- Local Storage for Theme Persistence
+- JavaScript 
 
 ## Installation
 
@@ -36,7 +38,7 @@ npm install
 
 3. Start the server:
 ```bash
-node server.js
+npm start 
 ```
 
 4. Open your browser and visit:
@@ -47,24 +49,33 @@ http://localhost:3000
 ## Project Structure
 
 ```
-project/
+todo-app/
 ├── public/
-│   └── index.html
+│   ├── index.html      # Main application file
+│   └── styles.css      # Styling
 ├── data/
-│   ├── users.json
-│   └── todos.json
-├── server.js
-├── package.json
-└── README.md
+│   ├── todos.json      # Todo data storage
+│   └── users.json      # User data storage
+├── server.js           # Backend server
+├── package.json        # Project configuration
+└── README.md          # Documentation
 ```
+
 
 ## API Endpoints
 
+### Authentication
 - `GET /api/users` - Get all users
 - `POST /api/register` - Register a new user
+  - Body: `{ email, username, password }`
 - `POST /api/login` - Login user
-- `GET /api/todos` - Get all todos
+  - Body: `{ identifier (email/username), password }`
+
+### Todo Management
+- `GET /api/todos` - Get all todos for a user
+  - Query: `userId`
 - `POST /api/todos` - Save todos
+  - Body: `{ todos: [], userId }`
 
 ## License
 
