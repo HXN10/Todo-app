@@ -2,7 +2,7 @@
 
 A modern, responsive Todo application with user authentication and theme switching capabilities.
 
-by Hasan wehba, Yacine mostafa, Mohammed dableh
+by Hasan wehba, Yacine mostafa
 
 
 ## Features
